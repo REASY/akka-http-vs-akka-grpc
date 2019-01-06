@@ -47,7 +47,7 @@ Execute the following to run  it against Akka gRPC.
 cd benchmark && sbt 'gatling:testOnly benchmark.NonBlockingGrpc'
 ```
 
-## Results
+## Results on local machine
 My machine:
 -   OS: Microsoft Windows  10 x64 [Version 10.0.17134.472]
 -   CPU: AMD Ryzen 7 2700X Eight-Core Processor i7 3.7 GHz
@@ -70,3 +70,18 @@ My machine:
 | Get flat type	  | 72000 | 72000 | 0  | 0%	  | 120	  | 0   |  1	   | 2        | 3        | 7        | 974  | 2    | 22      |
 | Add nested type | 72000 | 72000 | 0  | 0%	  | 120	  | 1   |  1	   | 2        | 3        | 7        | 934  | 2    | 22      |
 | Get nested type | 72000 | 72000 | 0  | 0%	  | 120	  | 1   |  1	   | 2        | 3        | 7        | 917  | 2    | 22      |
+
+### Why `Akka gRPC` performing worst than `Akka HTTP`?
+I run both load-tests with [Java Flight Recorder](https://docs.oracle.com/javacomponents/jmc-5-4/jfr-runtime-guide/about.htm#JFRUH170) to get some understanding what can be an issue. Here is the link to [jfr files](https://drive.google.com/open?id=1RUcjsRUwTcBDqLDWqimxc6K0MVbtuDSL). To open them you have to have installed Oracle JDK and use [Java Mission Control](https://www.oracle.com/technetwork/java/javaseproducts/mission-control/index.html). I guess the root cause might be GC, it triggers more often for `Akka gRPC` load test (Allocation rate is 1.652 times higher). But intuitively it seems that protobuf serialization/deserialzation should be faster and more GC-friendly. Though [Akka-gRPC](https://github.com/akka/akka-grpc#project-status) team says it's production-ready.
+
+### CPU usage
+![CPU usage](benchmark/results/jmc/CPU.PNG)
+
+### Threads
+![Memory usage](benchmark/results/jmc/Threads.PNG)
+
+### Memory usage
+![Memory usage](benchmark/results/jmc/Memory.PNG)
+
+### Allocations
+![Memory usage](benchmark/results/jmc/Allocations.PNG)
