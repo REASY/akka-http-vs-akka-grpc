@@ -3,8 +3,8 @@
 The aim of this project is to show a brief performance comparison [Akka HTTP](https://doc.akka.io/docs/akka-http/current/) and [Akka gRPC](https://developer.lightbend.com/docs/akka-grpc/current/). 
 
 The structure of this repo is as follows:
-	-  `servers` folder contains code related to servers
-	- `benchmark` folder contains load testing code
+ - [servers](servers) folder contains code related to servers
+ - [benchmark](benchmark) folder contains load testing code
 It is splitted in this way so dependencies do not interfere with each other. For load-testing I use [Gatling](https://gatling.io/) with [Gatling-gRPC](https://github.com/phiSgr/gatling-grpc) plugin to support gRPC.
 
 ## How to run servers
@@ -35,7 +35,7 @@ When it has started you will see:
 ## How to run load test
 Before running the load tests either Akka HTTP Server or Akka gRPC Server must be running first. 
 ### Load test against Akka HTTP
-Execute the following to run  it against Akka HTTP. `Blocking` here and further is about **server side code** having block operation (e.g., `Thread.sleep`, `Await.result` and etc):
+Execute the following to run  it against Akka HTTP. `Blocking` here and further is about [server side code](https://github.com/REASY/akka-http-vs-akka-grpc/blob/master/servers/common/src/main/scala/benchmark/common/services/ServiceExampleImpl.scala#L55) which is blocking operation (e.g., `Thread.sleep`, `Await.result` and etc):
 ```sh
 cd benchmark && sbt 'gatling:testOnly benchmark.NonBlockingHttp'
 ```
