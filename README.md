@@ -1,11 +1,12 @@
 
 # Akka HTTP vs Akka gRPC
-The aim of this project is to show a brief performance comparison [Akka HTTP](https://doc.akka.io/docs/akka-http/current/) and [Akka gRPC](https://developer.lightbend.com/docs/akka-grpc/current/). 
+The aim of this project is to show a brief performance comparison [Akka HTTP v10.1.5](https://doc.akka.io/docs/akka-http/current/) and [Akka gRPC v0.4.2](https://developer.lightbend.com/docs/akka-grpc/current/). 
 
 The structure of this repo is as follows:
  - [servers](servers) folder contains code related to servers
  - [benchmark](benchmark) folder contains load testing code
-It is splitted in this way so dependencies do not interfere with each other. For load-testing I use [Gatling](https://gatling.io/) with [Gatling-gRPC](https://github.com/phiSgr/gatling-grpc) plugin to support gRPC.
+
+It is splitted in this way so dependencies do not interfere with each other. For load-testing I use [Gatling](https://gatling.io/) with [Gatling-gRPC](https://github.com/phiSgr/gatling-grpc) plugin to support gRPC. Please, keep in mind that `.proto` file [schema.proto](servers/common/src/main/protobuf/schema.proto) and [schema.proto](benchmark/src/main/protobuf/schema.proto) must be in sync
 
 ## How to run servers
 ### Akka HTTP Server
