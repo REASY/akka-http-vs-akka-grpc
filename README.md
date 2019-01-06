@@ -34,7 +34,7 @@ When it has started you will see:
 ```
 
 ## How to run load test
-Before running the load tests either Akka HTTP Server or Akka gRPC Server must be running first. 
+Before running the load tests either Akka HTTP Server or Akka gRPC Server must be running first. Scenario for [HTTP load test](benchmark/src/test/scala/benchmark/NonBlockingHttp.scala), for [gRPC load test](benchmark/src/test/scala/benchmark/NonBlockingGrpc.scala). Load test duration is `10 minutes`, request rate is constant - `120` requests per second.
 ### Load test against Akka HTTP
 Execute the following to run  it against Akka HTTP. `Blocking` here and further is about [server side code](https://github.com/REASY/akka-http-vs-akka-grpc/blob/master/servers/common/src/main/scala/benchmark/common/services/ServiceExampleImpl.scala#L55) which is blocking operation (e.g., `Thread.sleep`, `Await.result` and etc):
 ```sh
@@ -72,7 +72,7 @@ My machine:
 | Get nested type | 72000 | 72000 | 0  | 0%	  | 120	  | 1   |  1	   | 2        | 3        | 7        | 917  | 2    | 22      |
 
 ### Why `Akka gRPC` performing worst than `Akka HTTP`?
-I run both load-tests with [Java Flight Recorder](https://docs.oracle.com/javacomponents/jmc-5-4/jfr-runtime-guide/about.htm#JFRUH170) to get some understanding what can be an issue. Here is the link to [jfr files](https://drive.google.com/open?id=1RUcjsRUwTcBDqLDWqimxc6K0MVbtuDSL). To open them you have to have installed Oracle JDK and use [Java Mission Control](https://www.oracle.com/technetwork/java/javaseproducts/mission-control/index.html). I guess the root cause might be GC, it triggers more often for `Akka gRPC` load test (Allocation rate is 1.652 times higher). But intuitively it seems that protobuf serialization/deserialzation should be faster and more GC-friendly. Though [Akka-gRPC](https://github.com/akka/akka-grpc#project-status) team says it's production-ready.
+I run both load-tests again with [Java Flight Recorder](https://docs.oracle.com/javacomponents/jmc-5-4/jfr-runtime-guide/about.htm#JFRUH170) turned-on to get some understanding what can be an issue. Here is the link to [jfr files](https://drive.google.com/open?id=1RUcjsRUwTcBDqLDWqimxc6K0MVbtuDSL). To open them you have to have installed Oracle JDK and use [Java Mission Control](https://www.oracle.com/technetwork/java/javaseproducts/mission-control/index.html). I guess the root cause might be GC, it triggers more often for `Akka gRPC` load test (Allocation rate is 1.652 times higher). But intuitively it seems that protobuf serialization/deserialzation should be faster and more GC-friendly. Though [Akka-gRPC](https://github.com/akka/akka-grpc#project-status) team says it's production-ready.
 
 ### CPU usage
 ![CPU usage](benchmark/results/jmc/CPU.PNG)
