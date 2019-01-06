@@ -6,7 +6,7 @@ The structure of this repo is as follows:
  - [servers](servers) folder contains code related to servers
  - [benchmark](benchmark) folder contains load testing code
 
-It is splitted in this way so dependencies do not interfere with each other. For load-testing I use [Gatling](https://gatling.io/) with [Gatling-gRPC](https://github.com/phiSgr/gatling-grpc) plugin to support gRPC. Please, keep in mind that `.proto` file [schema.proto](servers/common/src/main/protobuf/schema.proto) and [schema.proto](benchmark/src/main/protobuf/schema.proto) must be in sync
+It is splitted in this way so dependencies do not interfere with each other. For load-testing I use [Gatling](https://gatling.io/) with [Gatling-gRPC](https://github.com/phiSgr/gatling-grpc) plugin to support gRPC. Please, keep in mind that `.proto` file [schema.proto](servers/common/src/main/protobuf/schema.proto) and [schema.proto](benchmark/src/main/protobuf/schema.proto) must be in sync.
 
 ## How to run servers
 ### Akka HTTP Server
