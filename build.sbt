@@ -26,6 +26,7 @@ lazy val commonSettings = Seq(
 lazy val `common` =
   (project in file("common"))
     .enablePlugins(AkkaGrpcPlugin)
+    .enablePlugins(JmhPlugin)
     .settings(
       name := "common",
       commonSettings
