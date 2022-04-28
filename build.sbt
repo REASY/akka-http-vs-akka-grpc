@@ -20,7 +20,7 @@ def logGC(project: String) = Seq("-XX:+PrintGCDetails", "-XX:+PrintGCDateStamps"
 
 lazy val commonSettings = Seq(
   version := "0.0.1",
-  scalaVersion := "2.12.8"
+  scalaVersion := "2.13.8"
 )
 
 lazy val `common` =
@@ -37,19 +37,17 @@ lazy val `akka-http` =
       commonSettings,
       libraryDependencies ++= Seq(AkkaHttp, circeForAkka, circeGeneric),
       fork in run := true,
-      javaOptions in run ++= heapOptions ++ logGC("akka-http") ++ jfrWithMemAndExceptions
+      javaOptions in run ++= heapOptions ++ logGC("akka-http")
     )
     .dependsOn(`common`)
 
 lazy val `akka-grpc` =
   (project in file("akka-grpc"))
     .enablePlugins(AkkaGrpcPlugin)
-    .enablePlugins(JavaAgent)
     .settings(
       commonSettings,
       fork in run := true,
-      javaAgents += "org.mortbay.jetty.alpn" % "jetty-alpn-agent" % "2.0.9" % "runtime;test",
-      javaOptions in run ++= heapOptions ++ logGC("akka-grpc") ++ jfrWithMemAndExceptions
+      javaOptions in run ++= heapOptions ++ logGC("akka-grpc")
     )
     .dependsOn(`common`)
 

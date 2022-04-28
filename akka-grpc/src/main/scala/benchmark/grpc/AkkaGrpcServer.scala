@@ -1,9 +1,8 @@
 package benchmark.grpc
 
 import akka.actor.ActorSystem
-import akka.http.scaladsl.UseHttp2.Always
+import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
-import akka.http.scaladsl.{Http, HttpConnectionContext}
 import akka.stream.ActorMaterializer
 import benchmark.common.services.ServiceExampleImpl
 import com.typesafe.config.ConfigFactory
@@ -19,7 +18,7 @@ object AkkaGrpcServer {
       .withFallback(ConfigFactory.defaultApplication())
 
     // Akka boot up code
-    implicit val system = ActorSystem("GrpcServer", conf)
+    implicit val system: ActorSystem = ActorSystem("GrpcServer", conf)
     implicit val mat: ActorMaterializer = ActorMaterializer()
     implicit val executionContext: ExecutionContextExecutor = system.dispatcher
 
@@ -36,11 +35,8 @@ class AkkaGrpcServer(host: String, port: Int, svc: ServiceExampleImpl)
       ServiceExampleHandler(svc)
 
     // Bind service handler server
-    val bound = Http().bindAndHandleAsync(
-      service,
-      interface =  host,
-      port = port,
-      connectionContext = HttpConnectionContext(http2 = Always))
+    val bound = Http().newServerAt(host, port)
+      .bind(service)
 
     // report successful binding
     bound.foreach { binding =>

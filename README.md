@@ -1,5 +1,5 @@
 # Akka HTTP vs Akka gRPC
-The aim of this project is to show a brief performance comparison [Akka HTTP v10.1.5](https://doc.akka.io/docs/akka-http/current/) and [Akka gRPC v0.4.2](https://developer.lightbend.com/docs/akka-grpc/current/).
+The aim of this project is to show a brief performance comparison [Akka HTTP v10.2.9](https://doc.akka.io/docs/akka-http/current/) and [Akka gRPC v2.1.4](https://developer.lightbend.com/docs/akka-grpc/current/).
 
 Originally I tried to use  [Gatling](https://gatling.io/) with [Gatling-gRPC](https://github.com/phiSgr/gatling-grpc) plugin to support gRPC, but it could not make it to  keep high number of requests. So that's why I decided to switch to [wrk2](https://github.com/giltene/wrk2) to load test HTTP and [ghz](https://github.com/bojand/ghz) to load test gRPC.
 
@@ -44,68 +44,87 @@ ghz -insecure -proto ./schema.proto -call benchmark.grpc.ServiceExample.getEmplo
 
 ## Results on local machine
 My machine:
--   OS: Microsoft Windows  10 x64 [Version 10.0.17134.472]
--   CPU: AMD Ryzen 7 2700X Eight-Core Processor i7 3.7 GHz
--   Memory: DDR4-3200 GHz 16 GB
--   JVM: Java HotSpot(TM) 64-Bit Server VM (build 25.191-b12, mixed mode)
+-   OS:Ubuntu 20.04.4 LTS, x64
+-   CPU: Intel® Core™ i7-10750H CPU @ 2.60GHz × 12
+-   Memory: SODIMM DDR4 64 Gbytes
+-   JVM: Java 8, OpenJDK Runtime Environment (build 1.8.0_312-8u312-b07-0ubuntu1~20.04-b07)
 ### HTTP
 ```
 wrk -t1 -c100 -d300s -R14000 --latency http://127.0.0.1:8080/employees/42
 Running 5m test @ http://127.0.0.1:8080/employees/42
   1 threads and 100 connections
-  Thread calibration: mean lat.: 1.604ms, rate sampling interval: 10ms
+  Thread calibration: mean lat.: 5.824ms, rate sampling interval: 10ms
   Thread Stats   Avg      Stdev     Max   +/- Stdev
-    Latency     1.59ms  799.39us  34.66ms   75.78%
-    Req/Sec    14.75k     1.21k   52.30k    84.76%
+    Latency     1.24ms    1.17ms  50.02ms   94.29%
+    Req/Sec    14.77k     1.60k   45.44k    90.41%
   Latency Distribution (HdrHistogram - Recorded Latency)
- 50.000%    1.48ms
- 75.000%    2.08ms
- 90.000%    2.50ms
- 99.000%    3.18ms
- 99.900%    7.16ms
- 99.990%   24.19ms
- 99.999%   32.86ms
-100.000%   34.69ms
-#[Mean    =        1.589, StdDeviation   =        0.799]
-#[Max     =       34.656, Total count    =      4052985]
+ 50.000%    1.09ms
+ 75.000%    1.47ms
+ 90.000%    1.99ms
+ 99.000%    4.52ms
+ 99.900%   15.52ms
+ 99.990%   35.29ms
+ 99.999%   44.35ms
+100.000%   50.05ms
+
+#[Mean    =        1.239, StdDeviation   =        1.168]
+#[Max     =       50.016, Total count    =      4052987]
 #[Buckets =           27, SubBuckets     =         2048]
 ----------------------------------------------------------
-  4196552 requests in 5.00m, 832.45MB read
-Requests/sec:  13988.51
+  4196567 requests in 5.00m, 832.45MB read
+Requests/sec:  13988.55
 Transfer/sec:      2.77MB
+
 ```
 
 ### gRPC
 ```
-ghz -insecure -proto ./schema.proto -call benchmark.grpc.ServiceExample.getEmployee -c 100 -z 300s -d '{"employeeId": 1}' 127.0.0.1:8081
-
+ghz --insecure --proto ./common/src/main/protobuf/schema.proto --call benchmark.grpc.ServiceExample.getEmployee --concurrency 100 --rps 14000 --duration 300s --data '{"employeeId": 1}' 127.0.0.1:8081
 Summary:
-  Count:        4253496
-  Total:        300003.01 ms
-  Slowest:      82.51 ms
-  Fastest:      0.42 ms
-  Average:      3.48 ms
-  Requests/sec: 14178.18
+  Count:	4199967
+  Total:	300.00 s
+  Slowest:	28.98 ms
+  Fastest:	0.10 ms
+  Average:	1.14 ms
+  Requests/sec:	13999.85
+
+Response time histogram:
+  0.103  [1]      |
+  2.991  [907901] |∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎
+  5.878  [66877]  |∎∎∎
+  8.766  [19167]  |∎
+  11.654 [3071]   |
+  14.542 [1338]   |
+  17.430 [791]    |
+  20.318 [527]    |
+  23.205 [167]    |
+  26.093 [109]    |
+  28.981 [51]     |
+
 Latency distribution:
-  10% in 3.07 ms
-  25% in 3.28 ms
-  50% in 3.43 ms
-  75% in 3.57 ms
-  90% in 3.75 ms
-  95% in 3.95 ms
-  99% in 5.09 ms
+  10 % in 0.15 ms 
+  25 % in 0.17 ms 
+  50 % in 0.20 ms 
+  75 % in 0.43 ms 
+  90 % in 2.78 ms 
+  95 % in 4.40 ms 
+  99 % in 7.74 ms 
+
 Status code distribution:
-  [OK]   4253496 responses
+  [OK]            4199937 responses   
+  [Unavailable]   22 responses        
+  [Canceled]      8 responses         
+
+Error distribution:
+  [22]   rpc error: code = Unavailable desc = transport is closing                  
+  [8]    rpc error: code = Canceled desc = grpc: the client connection is closing   
+
 ```
 ### Table
 ```
 | Benchmark   | Total requests | Req/s    | Max,ms | Avg, ms | 50th pct | 75th pct | 90th pct | 99th pct |
 |-------------|----------------|----------|--------|---------|----------|----------|----------|----------|
-| Akka HTTP   | 4196552        | 13988.51 | 34.656 | 1.589   | 1.48     | 2.08     | 2.50     | 3.18     |
-| Akka gRPC   | 4253496        | 14178.18 | 82.51  | 3.48    | 3.43     | 3.57     | 3.75     | 5.09     |
+| Akka HTTP   | 4196567        | 13988.55 | 50.02  | 1.24    | 1.09     | 1.47     | 1.99     | 4.52     |
+| Akka gRPC   | 4199967        | 13999.85 | 28.98  | 1.14    | 0.20     | 0.43     | 2.78     | 7.74     |
 
 ```
-
-### Why `Akka gRPC` performing worst than `Akka HTTP`?
-I run both load-tests again with [Java Flight Recorder](https://docs.oracle.com/javacomponents/jmc-5-4/jfr-runtime-guide/about.htm#JFRUH170) turned-on to get some understanding what can be an issue. Here is the link to [jfr files](https://drive.google.com/open?id=110L63Vv8hy7nV8Qc7j6Y0Ql5l1SswhdW). To open them you have to have installed Oracle JDK and use [Java Mission Control](https://www.oracle.com/technetwork/java/javaseproducts/mission-control/index.html).  [GC logs for Akka HTTP server](https://gceasy.io:443/my-gc-report.jsp?p=c2hhcmVkLzIwMTkvMDEvMTUvLS1nY19ha2thLWh0dHBfMjAxOTAxMTUwOTUyMTcubG9nLS0xNi0yMS0yOQ==&channel=WEB) and [for Akka gRPC server](https://gceasy.io:443/my-gc-report.jsp?p=c2hhcmVkLzIwMTkvMDEvMTUvLS1nY19ha2thLWdycGNfMjAxOTAxMTUxMDAzMDIubG9nLS0xNi0yMi0yNQ==&channel=WEB). I guess the root cause might be GC, it triggers more often for `Akka gRPC` load test. But intuitively it seems that protobuf serialization/deserialzation should be faster and more GC-friendly. I found out that a lot of memory is consumed during protobuf deserialization:
-Here is the call from ScalaPB: [GeneratedMessageCompanion.scala#L197](https://github.com/scalapb/ScalaPB/blob/master/scalapb-runtime/shared/src/main/scala/scalapb/GeneratedMessageCompanion.scala#L197)  to Google protobuf [CodedInputStream.java#L92](https://github.com/protocolbuffers/protobuf/blob/3.6.x/java/core/src/main/java/com/google/protobuf/CodedInputStream.java#L92) with `DEFAULT_BUFFER_SIZE`4Kbytes which allocate that array here [CodedInputStream.java#L2101](https://github.com/protocolbuffers/protobuf/blob/3.6.x/java/core/src/main/java/com/google/protobuf/CodedInputStream.java#L2101).
